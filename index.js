@@ -24,20 +24,20 @@ async function run() {
         const database = client.db('juno_baby_toys_shop');
         const productsCollection = database.collection('products');
         const ordersCollection = database.collection('orders');
-
-
-        // GET all Products API 
-        app.get('/products', async (req, res) => {
-            const cursor = productsCollection.find({});
-            const products = await cursor.toArray();
-            res.send(products);
-        });
+        const reviewsCollection = database.collection('reviews');
 
         // POST Add Products
         app.post('/products', async (req, res) => {
             const products = req.body;
             const result = await productsCollection.insertOne(products);
             res.json(result);
+        });
+
+        // GET all Products API 
+        app.get('/products', async (req, res) => {
+            const cursor = productsCollection.find({});
+            const products = await cursor.toArray();
+            res.send(products);
         });
 
         // GET Single Product
@@ -68,6 +68,20 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await ordersCollection.deleteOne(query);
             res.json(result);
+        });
+
+        // POST Add Reviews
+        app.post('/reviews', async (req, res) => {
+            const reviews = req.body;
+            const result = await reviewsCollection.insertOne(reviews);
+            res.json(result);
+        });
+
+        // GET all Reviews API 
+        app.get('/reviews', async (req, res) => {
+            const cursor = reviewsCollection.find({});
+            const reviews = await cursor.toArray();
+            res.send(reviews);
         });
     }
 
