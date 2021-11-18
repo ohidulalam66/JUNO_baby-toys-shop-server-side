@@ -75,11 +75,46 @@ async function run() {
             res.send(orders);
         });
 
-        // DELETE single order API
+        // DELETE single Order API
         app.delete('/orders/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await ordersCollection.deleteOne(query);
+            res.json(result);
+        });
+
+        // single Product API
+        app.get('/updateProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const product = await productsCollection.findOne(query);
+            res.json(product);
+        });
+
+        // update product API
+        app.put('updateProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedProduct = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    name: updatedProduct.name,
+                    image: updatedProduct.image,
+                    price: updatedProduct.price,
+                    categories: updatedProduct.categories,
+                    description: updatedProduct.description
+                }
+            };
+            const result = await productsCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+        });
+
+        // DELETE single Product API
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
             res.json(result);
         });
 
@@ -101,7 +136,21 @@ async function run() {
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
-            console.log(result)
+            res.json(result);
+        });
+
+        // GET Add User
+        app.get('/users', async (req, res) => {
+            const cursor = usersCollection.find({});
+            const users = await cursor.toArray();
+            res.send(users);
+        });
+
+        // DELETE single User API
+        app.delete('/usersDelete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(query);
             res.json(result);
         });
 
