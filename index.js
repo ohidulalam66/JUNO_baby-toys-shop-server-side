@@ -4,6 +4,7 @@ const cors = require("cors");
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
 const ObjectId = require('mongodb').ObjectId;
+const { ObjectID } = require('bson');
 
 const port = process.env.PORT || 5000;
 
@@ -75,6 +76,24 @@ async function run() {
             res.send(orders);
         });
 
+        // single Product API
+        app.put('/orders', async (req, res) => {
+            const { id, updateStatus } = req.body;
+            const query = { _id: ObjectId(id) };
+            const order = await ordersCollection.findOne(query);
+            if (order._id) {
+                const filter = { _id: ObjectId(order._id) };
+                const options = { upsert: true };
+                const updateDoc = {
+                    $set: {
+                        status: updateStatus,
+                    }
+                };
+                const result = await ordersCollection.updateOne(filter, updateDoc, options);
+                res.json(result);
+            }
+        });
+
         // DELETE single Order API
         app.delete('/orders/:id', async (req, res) => {
             const id = req.params.id;
@@ -83,32 +102,6 @@ async function run() {
             res.json(result);
         });
 
-        // single Product API
-        app.get('/updateProducts/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const product = await productsCollection.findOne(query);
-            res.json(product);
-        });
-
-        // update product API
-        app.put('updateProducts/:id', async (req, res) => {
-            const id = req.params.id;
-            const updatedProduct = req.body;
-            const filter = { _id: ObjectId(id) };
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: {
-                    name: updatedProduct.name,
-                    image: updatedProduct.image,
-                    price: updatedProduct.price,
-                    categories: updatedProduct.categories,
-                    description: updatedProduct.description
-                }
-            };
-            const result = await productsCollection.updateOne(filter, updateDoc, options);
-            res.json(result);
-        });
 
         // DELETE single Product API
         app.delete('/products/:id', async (req, res) => {
